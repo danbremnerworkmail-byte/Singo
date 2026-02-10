@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINGO Interactive Whimsical Card</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0a0f2c;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+h1 {
+    font-size: 3.5em;
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    animation: flash 1s infinite alternate;
+}
+@keyframes flash {
+    from { text-shadow: 0 0 10px #ff00ff; }
+    to { text-shadow: 0 0 20px #00ffff; }
+}
+table { margin: 20px auto; border-collapse: collapse; }
+th, td {
+    width: 120px;
+    height: 120px;
+    border: 3px solid #444;
+    cursor: pointer;
+    font-size: 2.2em;
+    position: relative;
+}
+th { background: #222; color: #ff00ff; }
+td.marked { background: #00ff9c; color: #000; font-weight: bold; }
+.animation {
+    position: absolute;
+    font-size: 2.5em;
+    animation: floatUp 1s forwards;
+}
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity:1; }
+    100% { transform: translateY(-50px); opacity:0; }
+}
+#message {
+    font-size: 3em;
+    margin: 20px;
+    display:none;
+    color:#ffd700;
+    text-shadow:0 0 10px #ffd700;
+}
+</style>
+</head>
+<body>
+<h1>SINGO</h1>
+<p>Tap your numbers when called</p>
+<div id="message"></div>
+<table id="card"></table>
+
+<script>
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function generate(){
+ const ranges=[[1,15],[16,30],[31,45],[46,60],[61,75]];
+ const table=document.getElementById('card'); table.innerHTML='';
+ let h=table.insertRow();["S","I","N","G","O"].forEach(l=>{let th=document.createElement('th');th.innerText=l;h.appendChild(th);});
+ let cols=ranges.map(r=>shuffle([...Array(r[1]-r[0]+1)].map((_,i)=>i+r[0])).slice(0,5));
+ for(let r=0;r<5;r++){
+  let row=table.insertRow();
+  for(let c=0;c<5;c++){
+   let td=row.insertCell();
+   if(r===2&&c===2){td.innerText="FREE";td.classList.add("marked");}
+   else{
+    td.innerText=cols[c][r];
+    td.onclick=()=>{td.classList.toggle("marked");anim(td,cols[c][r]);check();};
+   }
+  }
+ }
+}
+function anim(cell,num){
+ let d=document.createElement("div");d.className="animation";
+ d.innerText=num==1?"😉":num==2?"🦆":num==44?"4️⃣":num==88?"👯":"✨";
+ cell.appendChild(d);setTimeout(()=>d.remove(),1000);
+}
+function check(){
+ const rows=[...document.getElementById("card").rows].slice(1);
+ let line=rows.some(r=>[...r.cells].every(c=>c.classList.contains("marked")));
+ let bingo=rows.every(r=>[...r.cells].every(c=>c.classList.contains("marked")));
+ let corners=rows[0].cells[0].classList.contains("marked") &&
+             rows[0].cells[4].classList.contains("marked") &&
+             rows[4].cells[0].classList.contains("marked") &&
+             rows[4].cells[4].classList.contains("marked");
+ let msg=document.getElementById("message");
+ if(bingo){msg.innerText="BINGO!";msg.style.display="block";}
+ else if(corners){msg.innerText="CORNER CHALLENGE 🍹";msg.style.display="block";}
+ else if(line){msg.innerText="LINE!";msg.style.display="block";}
+ else msg.style.display="none";
+}
+generate();
+</script>
+</body>
+</html>
